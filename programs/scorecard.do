@@ -16,9 +16,28 @@ if !_rc {
 	mkdir $root/data/scratch
 }
 
+// switches
+local switch_build 	= 0
+local switch_clean	= 1
+
 ***********************************************
 
 // build raw scorecard data
-do $root/programs/build_scorecard 
+if `switch_build' {
+	do $root/programs/build 
+}
+
+// clean data
+if `switch_clean' {
+
+	// load data
+	use $root/data/build/scorecard, clear
+
+	// drop variables we're not using in our analysis
+	do $root/programs/dropVars 
+
+	// select our sample of eligible schools
+	do $root/programs/sample
+}
 
 ***********************************************
