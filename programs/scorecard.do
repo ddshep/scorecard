@@ -17,7 +17,7 @@ if !_rc {
 
 ***********************************************
 
-// format raw data
-do $root/programs/clean 
+// build raw scorecard data
+do $root/programs/build_scorecard 
 
 ***********************************************
