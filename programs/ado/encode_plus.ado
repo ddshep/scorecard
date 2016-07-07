@@ -125,7 +125,6 @@ program define encode_plus, nclass
 	cap assert (`merge' != 1 | missing(`varlist'))
 	if _rc {
 		display as error "The following values for `varlist' were not found in the supporting spreadsheet:"
-		display as error "Function call was encode_excel `0' "
 		tab `varlist' if (`merge' == 1)
 		exit _rc
 	}	
@@ -139,8 +138,10 @@ program define encode_plus, nclass
 	}
 	
 	// replace raw values with clean values
+	local lbl: var label `varlist'
 	drop `varlist'
-	generate `varlist' = `code'		
+	generate `varlist' = `code'
+	label var `varlist' "`lbl'"		
 	
 	// label values
 	cap label drop `varlist'
