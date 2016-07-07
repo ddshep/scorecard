@@ -1,6 +1,15 @@
+***********************************************
+***********************************************
+***********************************************
+
+*** LOCAL MACROS ***
+
 // data files
-local data_raw		$root/data/raw/Most-Recent-Cohorts-All-Data-Elements.csv
-local data_dict		$root/data/raw/CollegeScorecardDataDictionary-09-08-2015.csv
+local raw_url		https://collegescorecard.ed.gov/downloads
+local raw_file		Most-Recent-Cohorts-All-Data-Elements.csv
+local dict_url		https://collegescorecard.ed.gov/assets
+local dict_file		CollegeScorecardDataDictionary-09-08-2015.csv
+local doc_file		FullDataDocumentation.pdf
 
 // variables in data dictionary that don't exist in most recent data
 local varsNotFound 	inlist(variablename, "locale2") 
@@ -15,13 +24,13 @@ local supp_int			9999
 local lbl_missing		`" `null_miss' "`null_str'" `supp_miss' "`supp_str'" "'
 
 // degree offering categories
-local cipVals		"0, 1, 2, `null_miss'"
-local cip0			"Program not offered"
-local cip1			"Program offered"
-local cip2			"Program offered through an exclusively distance-education program"
-local lbl_cip		`"`null_miss' "`null_str'" "'
+local cipVals			"0, 1, 2, `null_miss'"
+local cip0				"Program not offered"
+local cip1				"Program offered"
+local cip2				"Program offered through an exclusively distance-education program"
+local lbl_cip			`"`null_miss' "`null_str'" "'
 foreach val in 0 1 2 {
-	local lbl_cip	`" `lbl_cip' `val' "`cip`val''" "'
+	local lbl_cip		`" `lbl_cip' `val' "`cip`val''" "'
 }
 
 ***********************************************
@@ -30,8 +39,20 @@ foreach val in 0 1 2 {
 
 *** FORMAT DATA DICTIONARY ***
 
+// download raw data
+cap confirm file $root/data/raw/`dict_file'
+if _rc {
+	shell curl -o $root/data/raw/`dict_file' `dict_url'/`dict_file'
+}
+
+// download documentation 
+cap confirm file $root/documentation/`doc_file'
+if _rc {
+	shell curl -o $root/documentation/`doc_file' `dict_url'/`doc_file'
+}
+
 // load dictionary
-insheet using `data_dict', comma names clear
+insheet using $root/data/raw/`dict_file', comma names clear
 
 // fill down blank variable names
 gen first = !missing(variablename)
@@ -85,13 +106,19 @@ foreach v of local labeled {
 
 *** FORMAT SCORECARD DATA ***
 
+// download raw data
+cap confirm file $root/data/raw/`raw_file'
+if _rc {
+	shell curl -o $root/data/raw/`raw_file' `raw_url'/`raw_file'
+}
+
 // load raw data
-insheet using `data_raw', comma names clear
+insheet using $root/data/raw/`raw_file', comma names clear
 
 // name and label variables
 rename_plus using `names', name_new(variablename) name_old(variablename) label(nameofdataelement) keepx caseignore
 
-// encode categorial variables
+// encode categorical variables
 
 	// one-off fixes for single observations
 	tostring st_fips, replace
@@ -132,15 +159,17 @@ foreach v of varlist cip* {
 	label values `v' cip
 }
 
+// add labels to predominant degree
+label values sch_deg highdeg
+
 ***********************************************
 ***********************************************
 ***********************************************
 
-*** SAVE CLEAN DATA ***
-
+// save clean data
 aorder 
 compress
-save ${data_clean}, replace
+save $root/data/build/scorecard, replace
 
 ***********************************************
 ***********************************************

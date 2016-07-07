@@ -8,9 +8,12 @@ set more off
 // directories
 global root 		/Users/slhudson/Documents/sbst/scorecard
 sysdir set PERSONAL	$root/programs/ado
-
-// data files
-global data_clean	$root/data/clean/scorecard
+cap mkdir			$root/documentation
+cap mkdir			$root/data
+if !_rc {
+	mkdir $root/data/raw
+	mkdir $root/data/build
+}
 
 ***********************************************
 
