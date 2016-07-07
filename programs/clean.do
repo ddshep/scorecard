@@ -1,19 +1,6 @@
-// preamble
-clear all
-label  drop _all
-matrix drop _all
-macro  drop _all
-set more off
-
-// directories
-local root 			/Users/slhudson/Documents/sbst/scorecard
-local scratch		`root'/data/scratch
-sysdir set PERSONAL	`root'/programs/ado
-
 // data files
-local data_raw		`root'/data/raw/Most-Recent-Cohorts-All-Data-Elements.csv
-local data_dict		`root'/data/raw/CollegeScorecardDataDictionary-09-08-2015.csv
-local data_clean	`root'/data/clean/scorecard
+local data_raw		$root/data/raw/Most-Recent-Cohorts-All-Data-Elements.csv
+local data_dict		$root/data/raw/CollegeScorecardDataDictionary-09-08-2015.csv
 
 // variables in data dictionary that don't exist in most recent data
 local varsNotFound 	inlist(variablename, "locale2") 
@@ -153,7 +140,7 @@ foreach v of varlist cip* {
 
 aorder 
 compress
-save `data_clean', replace
+save ${data_clean}, replace
 
 ***********************************************
 ***********************************************
