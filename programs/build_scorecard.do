@@ -1,3 +1,6 @@
+// This program downloads and assembles the raw scorecard data, 
+// applying string labels to categorical variables.
+
 ***********************************************
 ***********************************************
 ***********************************************
