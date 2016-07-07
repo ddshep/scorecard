@@ -1,37 +1,50 @@
-// We'll work on the preamble at the very end.
 // Purpose: This program maps raw values to clean, labeled integers using a crosswalk 
-// provided in an external spreadsheet.
+// provided in the using data or an external spreadsheet.
 
 **************************************************************************************
 **************************************************************************************
 **************************************************************************************
 
-capture program drop encode_excel
+capture program drop encode_plus
 
-program define encode_excel, nclass
+program define encode_plus, nclass
 	syntax varname using/, 	raw(string) clean(string) label(string) ///
-							[sheet(string)] [noallow_missing]	///
-							[CASEignore]
+							[excel] [sheet(string)] 		///
+							[noallow_missing] [CASEignore] 	///
 
-	
-	di "encoding `varlist' from `using'..."
-	
 	// declare temporary variables
 	tempvar merge code N
+
+	// declare error codes
+	local syntaxError 198
+
+	// display process comment
+	di ""
+	di "encoding `varlist' from `using'..."
+	di ""
 	
-	// determine if varlist is string or number
+	// determine if raw values are string or numeric
 	cap confirm numeric variable `varlist' 
-	local type_string = _rc
-	if `type_string' != 0 & "`caseignore'" == "caseignore" {
-		qui replace `varlist' = lower(`varlist')
-	}
+	local type_string_raw = _rc
 	preserve
+
 	**************************************************************************************
 	
 	*** DEFINE MAPPING FROM RAW TO CLEAN VALUES ***
 	
 	// get code values matched to raw values 
-	import excel  `using', sheet(`sheet') firstrow clear
+	if "`excel'" == "excel" {
+		if "`sheet'" != "" {
+			import excel  `using', sheet(`sheet') firstrow clear
+		}
+		else {
+			display as error "Must specify sheet when using excel option"
+			exit `syntaxError'
+		}
+	}
+	else {
+		use `using', clear
+	}
 	keep `clean' `raw' `label'
 	
 		// allow for raw and (label or clean) to be same spreadsheet column
@@ -41,16 +54,21 @@ program define encode_excel, nclass
 				gen ``v'' = `raw'
 			}
 		}
+
+	// determine if potential values are string or numeric
+	cap confirm numeric variable `raw' 
+	local type_string_pot = _rc	
 		
-	// make `raw' string or not depending on `varlist' format, and reduce to 
-	// unique combinations of raw, clean, and label values 
-	if `type_string'  {
+	// make potential value string if either raw or potential values are strings
+	if `type_string_raw' | `type_string_pot'  {
 		qui tostring `raw', replace usedisplayformat 
-		qui drop if `raw' == "."
 		if "`caseignore'" == "caseignore" {
 			qui replace `raw' = lower(`raw')
 		}
 	}
+
+	// reduce to unique, non-missing combinations of raw, clean, and label values 
+	qui drop if `raw' == "."
 	qui drop if missing(`raw')
 	qui duplicates drop
 		
@@ -74,10 +92,10 @@ program define encode_excel, nclass
 		exit _rc
 	}
 
-	// define label: this is a PITA method to store a local for each value label
+	// define label: this is a PITA (plug in the answer) method to store a local for each value label
 	qui levelsof `clean', local(codes_clean) 
 	foreach x of local codes_clean {
-		forvalues i = 1/`=_N'{
+		forvalues i = 1/`=_N' {
 			if `clean'[`i'] == `x' {
 				local label_`x' = `label'[`i']
 				break
@@ -91,6 +109,14 @@ program define encode_excel, nclass
 	
 	// restore master data
 	restore
+
+	// make raw values string if either raw or potential values are strings
+	if `type_string_raw' | `type_string_pot'  {
+		qui tostring `varlist', replace usedisplayformat 
+		if "`caseignore'" == "caseignore" {
+			qui replace `varlist' = lower(`varlist')
+		}
+	}
 	
 	// merge with clean values
 	qui merge m:1 `varlist' using `codes', keep(master match) keepusing(`code')  gen(`merge')
