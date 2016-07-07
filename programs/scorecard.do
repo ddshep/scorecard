@@ -13,6 +13,7 @@ cap mkdir			$root/data
 if !_rc {
 	mkdir $root/data/raw
 	mkdir $root/data/build
+	mkdir $root/data/scratch
 }
 
 ***********************************************
