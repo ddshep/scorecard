@@ -1,0 +1,25 @@
+data/raw/CollegeScorecardDataDictionary-09-08-2015.csv
+data/raw/Most-Recent-Cohorts-All-Data-Elements.csv
+data/raw/Most-Recent-Cohorts-Scorecard-Elements.csv
+data/raw/Most-Recent-Cohorts-Treasury-Elements (1).csv
+data/raw/college-scorecard-raw-data-030216/merged_1996_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_1997_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_1998_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_1999_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2000_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2001_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2002_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2003_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2004_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2005_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2006_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2007_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2008_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2009_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2010_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2011_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2012_PP.csv
+data/raw/college-scorecard-raw-data-030216/merged_2013_PP.csv
+documentation/FullDataDocumentation.pdf
+documentation/UsingFederalDataToMeasureAndImprovePerformance.pdf
+sublime2stata.do
