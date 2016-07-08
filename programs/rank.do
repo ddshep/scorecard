@@ -17,8 +17,8 @@ else {
 	local year_repay `year_repay'yr_rt
 }
 
-// local net price factor
-local netPriceScale = 1.1
+// maximum net price relative to initial FAFSA school
+local netPriceMax = 1.1
 
 // variables that we're ranking on
 #delimit ;
@@ -136,7 +136,7 @@ egen j = group(i bracket)
 
 // apply suggestion criteria
 gen suggest = 1
-replace suggest = 0 if alt_netPrice > (`netPriceScale' * netPrice)
+replace suggest = 0 if alt_netPrice > (`netPriceMax' * netPrice)
 foreach v of varlist c150_4_pooled_supp repayRate earnings {
 	replace suggest = 0 if (alt_`v' > `v') | (alt_`v' < state_`v')
 }
