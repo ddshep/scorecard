@@ -9,11 +9,16 @@ matrix drop _all
 macro  drop _all
 set more off
 
+// switches: use these to skip over the time intensive data building 
+// after you've done it once
+local switch_build 	= 0
+local switch_clean	= 1
+
 // directories
 global root 		/Users/slhudson/Documents/sbst/scorecard
 sysdir set PERSONAL	$root/programs/ado
 cap mkdir			$root/documentation
-cap mkdir			$root/graphs
+cap mkdir			$root/output
 cap mkdir			$root/data
 if !_rc {
 	mkdir $root/data/raw
@@ -21,9 +26,10 @@ if !_rc {
 	mkdir $root/data/scratch
 }
 
-// switches
-local switch_build 	= 0
-local switch_clean	= 1
+// initalize log file
+cap log close
+log using $root/output/log.txt, replace 
+log off
 
 ***********************************************
 
@@ -42,7 +48,10 @@ if `switch_clean' {
 	do $root/programs/dropVars 
 
 	// select our sample of eligible schools
-	do $root/programs/sample
+	do $root/programs/clean
 }
+
+// close log
+log close
 
 ***********************************************
