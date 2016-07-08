@@ -1,3 +1,6 @@
+// This program drops excess variables from the Scorecard
+// data that we're not using in our analysis.
+
 ***********************************************
 
 *** GRADUATION RATES ***
