@@ -11,8 +11,8 @@ set more off
 
 // switches: use these to skip over the time intensive data building 
 // after you've done it once
-local switch_build 	= 0
-local switch_clean	= 1
+local switch_build 	= 1
+local switch_rank	= 1
 
 // directories
 global root 		/Users/slhudson/Documents/sbst/scorecard
@@ -28,7 +28,7 @@ if !_rc {
 
 // initalize log file
 cap log close
-log using $root/output/log.txt, replace 
+log using $root/output/log.txt, text replace 
 log off
 
 ***********************************************
@@ -39,7 +39,7 @@ if `switch_build' {
 }
 
 // clean data
-if `switch_clean' {
+if `switch_rank' {
 
 	// load data
 	use $root/data/build/scorecard, clear
@@ -48,7 +48,7 @@ if `switch_clean' {
 	do $root/programs/dropVars 
 
 	// select our sample of eligible schools
-	do $root/programs/clean
+	do $root/programs/rank
 }
 
 // close log
