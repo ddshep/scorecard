@@ -21,6 +21,7 @@ else {
 #delimit ;
 local vars_rank 
 	npt4? 							// net price by income quintile	
+	num4?							// sample counts by income quintile
 	c150_4_pooled_supp 				// bachelor's completion in 150% time
 	mn_earn_wne_inc?_p`year_earn'	// median earnings by income bracket
 	??_inc_rpy_`year_repay'			// repayment rate by income bracket
@@ -88,7 +89,37 @@ joinby st_fips using `sample_using'
 merge m:1 st_fips using `states', assert(match) nogen
 compress
 
+***********************************************
 
-save $root/data/scratch/clean, replace
+*** RESHAPE BY INCOME BRACKET ***
+
+// combine income quintiles into lo, md, hi brackets
+foreach prefix in "" "alt_" "state_" {
+	gen `prefix'netPrice_lo = `prefix'npt41
+	gen `prefix'netPrice_md = ((`prefix'num42 * `prefix'npt42) + (`prefix'num43 * `prefix'npt43)) / (`prefix'num42 * `prefix'num43)
+	gen `prefix'netPrice_hi = ((`prefix'num44 * `prefix'npt44) + (`prefix'num45 * `prefix'npt45)) / (`prefix'num44 * `prefix'num45)
+} 
+
+// rename repayment groups so that income bracket is last
+rename *lo_inc_rpy_`year_repay' *repayRate_lo
+rename *md_inc_rpy_`year_repay' *repayRate_md
+rename *hi_inc_rpy_`year_repay' *repayRate_hi
+
+// for now, act as if these brackets map onto terciles
+rename *mn_earn_wne_inc1_p`year_earn' *earnings_lo
+rename *mn_earn_wne_inc2_p`year_earn' *earnings_md
+rename *mn_earn_wne_inc3_p`year_earn' *earnings_hi
+
+// reshape by bracket
+gen i = _n
+unab vars: *netPrice* *repayRate* *earnings*
+local stubs: subinstr local vars "_lo" "", all
+local stubs: subinstr local stubs "_md" "", all
+local stubs: subinstr local stubs "_hi" "", all
+local stubs: list uniq stubs
+reshape long `stubs', i(i) j(bracket) string
+
+***********************************************
+
 
 ***********************************************
