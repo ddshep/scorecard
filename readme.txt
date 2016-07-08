@@ -8,8 +8,6 @@ analysis to speed up run time.
 
 - rank.do generates the list of suggested colleges that "outrank" each school based on our algorithm parameters
 
-build.do will download the raw data from the web through a Unix shell. I'm not certain that this step will 
-work if you're running Stata for Windows.  The syntax may be Mac-specific.  Let me know if that's the case and I can send you the data files.
+build.do will download the raw data from the web through a Unix shell. I'm not certain that this step will work if you're running Stata for Windows.  The syntax may be Mac-specific.  Let me know if that's the case and I can send you the data files.
 
-All output, including the list of suggested schools and some graphs and descriptive statistics about the sample restrictions,
-gets stored in the output directory.
+All output, including the list of suggested schools and some graphs and descriptive statistics about the sample restrictions,gets stored in the output directory.  The output directory can’t be seen in the repo as is.  It gets created when you run the program.
