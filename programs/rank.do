@@ -17,6 +17,9 @@ else {
 	local year_repay `year_repay'yr_rt
 }
 
+// local net price factor
+local netPriceScale = 1.1
+
 // variables that we're ranking on
 #delimit ;
 local vars_rank 
@@ -121,5 +124,12 @@ reshape long `stubs', i(i) j(bracket) string
 
 ***********************************************
 
+*** DETERMINE SUGGESTED SCHOOLS ***
+
+gen suggest = 1
+replace suggest = 0 if alt_netPrice > (`netPriceScale' * netPrice)
+foreach v of varlist c150_4_pooled_supp repayRate earnings {
+	replace suggest = 0 if (alt_`v' > `v') | (alt_`v' < state_`v')
+}
 
 ***********************************************
