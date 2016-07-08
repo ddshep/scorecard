@@ -1,5 +1,5 @@
 // This is the master program for the Scorecard data
-// cleaning an analysis.  All other programs are called 
+// cleaning and analysis.  All other programs are called 
 // from within it.
 
 // preamble
