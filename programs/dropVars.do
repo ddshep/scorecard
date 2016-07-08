@@ -60,17 +60,6 @@ foreach v of varlist *_rpy_* {
 
 ***********************************************
 
-*** EARNINGS ***
-
-// focus on earnings 10 years out
-foreach v of varlist *earn* {
-	if !regexm("`v'", "10") {
-		drop `v'
-	}
-}
-
-***********************************************
-
 *** TEST SCORES ***
 
 // drop subject specific scores
