@@ -40,6 +40,9 @@ local vars_rank
 assert inlist(curroper, 0, 1)
 keep if curroper 
 
+// drop distance-only schools, since we want to restrict on geography
+keep if distanceonly == "Not distance-education only":distanceonly
+
 // keep four-year schools
 keep if preddeg == "Predominantly bachelor's-degree granting":preddeg
 
