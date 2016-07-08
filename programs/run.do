@@ -1,6 +1,5 @@
-// This is the master program for the Scorecard data
-// cleaning and analysis.  All other programs are called 
-// from within it.
+// This is the master program for the Scorecard analysis.  
+// All other programs are called from within it.
 
 // preamble
 clear all
@@ -47,7 +46,7 @@ if `switch_rank' {
 	// drop variables we're not using in our analysis
 	do $root/programs/dropVars 
 
-	// select our sample of eligible schools
+	// generate suggested schools
 	do $root/programs/rank
 }
 
