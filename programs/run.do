@@ -1,3 +1,7 @@
+// This is the master program for the Scorecard data
+// cleaning an analysis.  All other programs are called 
+// from within it.
+
 // preamble
 clear all
 label  drop _all
@@ -9,6 +13,7 @@ set more off
 global root 		/Users/slhudson/Documents/sbst/scorecard
 sysdir set PERSONAL	$root/programs/ado
 cap mkdir			$root/documentation
+cap mkdir			$root/graphs
 cap mkdir			$root/data
 if !_rc {
 	mkdir $root/data/raw
