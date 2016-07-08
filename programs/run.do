@@ -29,7 +29,7 @@ if !_rc {
 // initalize log file
 cap log close
 log using $root/output/log.txt, text replace 
-log off
+qui log off
 
 ***********************************************
 

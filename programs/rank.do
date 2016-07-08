@@ -54,9 +54,9 @@ window manage close graph;
 keep if pftftug1_ef > `ftft_min' & !missing(pftftug1_ef)
 
 // count schools by state
-log on 
+qui log on 
 tab st_fips
-log off
+qui log off
 
 ***********************************************
 
