@@ -131,12 +131,12 @@ foreach v of varlist c150_4_pooled_supp repayRate earnings {
 	replace suggest = 0 if (alt_`v' > `v') | (alt_`v' < state_`v')
 }
 
-// if chosen school has non-missing test scores, 25th percentile of candidate schools cannot be markedly higher
-// than the chosen schools 25th percentile.
+// if chosen school has non-missing test scores, 25th percentile of candidate schools cannot be 
+// too much higher than the chosen school's 50th percentile.
 //
-// Need to think more caefully about what to do if either the chosen or alternate= school has misssing values
-foreach exam in actcm25 satmt25 satvr25 {
-	replace suggest = 0 if !missing(`test') & !missing(alt_`exam') & (alt_`exam' > `exam' + `bw_`exam'')
+// Need to think more carefully about what to do if either the chosen or alternate= school has missing values
+foreach exam in actcm satmt satvr {
+	replace suggest = 0 if !missing(`exam'mid) & !missing(alt_`exam'25) & (alt_`exam'25 > `exam'mid + `bw_`exam'')
 }
 
 // drop own matches
