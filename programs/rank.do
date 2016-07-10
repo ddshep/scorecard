@@ -14,6 +14,11 @@ local year_repay 3yr_rt_supp
 // maximum net price relative to initial FAFSA school
 local netPriceMax = 1.1
 
+// test score bandwidths
+local bw_actcm25 = 5
+local bw_satmt25 = 200
+local bw_satvr25 = 200
+
 // variables that we're ranking on
 #delimit ;
 local vars_rank 
@@ -22,7 +27,7 @@ local vars_rank
 	c150_4_pooled_supp 				// bachelor's completion in 150% time
 	mn_earn_wne_inc?_p`year_earn'	// median earnings by income bracket
 	??_inc_rpy_`year_repay'			// repayment rate by income bracket
-	// add test scores
+	sat* act*						// SAT and ACT scores
 ;
 #delimit cr
 
@@ -124,6 +129,14 @@ replace suggest = 0 if alt_netPrice > (`netPriceMax' * netPrice)
 // graduation, repayment and earnings must be higher than both chosen school and state average
 foreach v of varlist c150_4_pooled_supp repayRate earnings {
 	replace suggest = 0 if (alt_`v' > `v') | (alt_`v' < state_`v')
+}
+
+// if chosen school has non-missing test scores, 25th percentile of candidate schools cannot be markedly higher
+// than the chosen schools 25th percentile.
+//
+// Need to think more caefully about what to do if either the chosen or alternate= school has misssing values
+foreach exam in actcm25 satmt25 satvr25 {
+	replace suggest = 0 if !missing(`test') & !missing(alt_`exam') & (alt_`exam' > `exam' + `bw_`exam'')
 }
 
 // drop own matches
