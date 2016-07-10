@@ -15,9 +15,9 @@ local year_repay 3yr_rt_supp
 local netPriceMax = 1.1
 
 // test score bandwidths
-local bw_actcm25 = 5
-local bw_satmt25 = 200
-local bw_satvr25 = 200
+local bw_actcm = 5
+local bw_satmt = 200
+local bw_satvr = `bw_satmt'
 
 // variables that we're ranking on
 #delimit ;
