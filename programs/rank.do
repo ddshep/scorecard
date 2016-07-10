@@ -8,14 +8,8 @@ local ftft_min = .5
 // earnings time horizon
 local year_earn = 10
 
-// repayment rate time horizon
-local year_repay = 3
-if `year_repay' == 3 {
-	local year_repay 3yr_rt_supp
-}
-else {
-	local year_repay `year_repay'yr_rt
-}
+// repayment rate time horizon; if year 3, we can use the version that suppresses small cells
+local year_repay 3yr_rt_supp
 
 // maximum net price relative to initial FAFSA school
 local netPriceMax = 1.1
