@@ -14,6 +14,17 @@ local year_repay 3yr_rt_supp
 // maximum net price relative to initial FAFSA school
 local netPriceMax = 1.1
 
+// family income percentiles
+local income0  	= 0 
+local income20 	= 30000
+local income40 	= 48000
+local income60 	= 75000
+local income80 	= 110000
+local income33 	= 36000		// these last two are my ballparks of the tercile cut points
+local income66 	= 81000 
+local income100	= .
+local income_pcts 0 20 33 40 60 66 80
+
 // test score bandwidths
 local bw_actcm = 5
 local bw_satmt = 200
@@ -22,12 +33,11 @@ local bw_satvr = `bw_satmt'
 // variables that we're ranking on
 #delimit ;
 local vars_rank 
-	npt4? 							// net price by income quintile	
-	num4?							// sample counts by income quintile
-	c150_4_pooled_supp 				// bachelor's completion in 150% time
-	mn_earn_wne_inc?_p`year_earn'	// median earnings by income bracket
-	??_inc_rpy_`year_repay'			// repayment rate by income bracket
-	sat* act*						// SAT and ACT scores
+	netPrice					
+	grad			
+	earnings					
+	repay				
+	sat* act*					
 ;
 #delimit cr
 
@@ -50,71 +60,74 @@ keep if pftftug1_ef > `ftft_min' & !missing(pftftug1_ef)
 
 ***********************************************
 
-*** JOIN DATA TO GENERATE COMPARISONS ***
+*** HARMONIZE INCOME BRACKETS ***
+
+// generate one row for each income bracket
+gen i = _n
+local n_brackets: word count `income_pcts'
+expand `n_brackets'
+bysort i: gen n = _n
+
+// set income ranges for each bracket
+gen income_low 	= .
+gen income_high = . 
+forvalues j = 1/`n_brackets' {
+	local low: 	word `j' 		of `income_pcts'
+	local high:	word `=`j'+1'	of `income_pcts'
+	replace income_low 	= `income`low'' 	if (n == `j')
+	if `j' < `n_brackets' {
+		replace income_high	= `income`high''	if (n == `j')
+	}
+}
+
+// net price is reported in quintiles
+gen netPrice = .
+forvalues j = 5(-1)1 {
+	replace netPrice = npt4`j' if (income_high <= `income`=20*`j''')
+} 
+
+// repayment rate is 1st quintile, 2+3 quintile, 4+5 quintile
+gen repay 		= hi_inc_rpy_`year_repay'
+replace repay 	= md_inc_rpy_`year_repay' if (income_high <= `income60')
+replace repay 	= lo_inc_rpy_`year_repay' if (income_high <= `income20')
+
+// earnings is in terciles
+gen earnings 	 = mn_earn_wne_inc3_p`year_earn' 
+replace earnings = mn_earn_wne_inc2_p`year_earn' if (income_high <= `income66') 
+replace earnings = mn_earn_wne_inc1_p`year_earn' if (income_high <= `income33') 
+
+// graduation rate is not dissagregated by income
+rename c150_4_pooled_supp grad
+
+***********************************************
+
+*** JOIN DATA TO GENERATE COMPARISONS ACROSS SCHOOLS ***
 
 // save sample
 tempfile sample alt states
 save `sample'
 
 // add alt prefixes for candidate schools
-keep `vars_rank' st_fips instnm *opeid*
+keep `vars_rank' st_fips income* instnm *opeid*
 rename * alt_*
-rename alt_st_fips st_fips
+rename (alt_st_fips alt_income*) (st_fips income*)
 save `alt'
 
 // calculate state averages
 use `sample', clear
-keep `vars_rank' st_fips instnm ugds
-collapse `vars_rank' [aw = ugds], by(st_fips)
+keep `vars_rank' st_fips income* instnm ugds
+collapse `vars_rank' [aw = ugds], by(st_fips income_low income_high)
 rename * state_*
-rename state_st_fips st_fips
+rename (state_st_fips state_income*) (st_fips income*)
 save `states'
 
 // join with all schools in the state
 use `sample', clear
-gen i = _n
-joinby st_fips using `alt'
+joinby st_fips income_low income_high using `alt'
 
 // merge with state averages
-merge m:1 st_fips using `states', assert(match) nogen
+merge m:1 st_fips income_low income_high using `states', assert(match) nogen
 compress
-
-***********************************************
-
-*** RESHAPE BY INCOME BRACKET ***
-
-// average income quintiles into lo, md, hi brackets used in repayment rate
-foreach prefix in "" "alt_" "state_" {
-	gen `prefix'netPrice_lo = `prefix'npt41
-	gen `prefix'netPrice_md = ((`prefix'num42 * `prefix'npt42) + (`prefix'num43 * `prefix'npt43)) / (`prefix'num42 * `prefix'num43)
-	gen `prefix'netPrice_hi = ((`prefix'num44 * `prefix'npt44) + (`prefix'num45 * `prefix'npt45)) / (`prefix'num44 * `prefix'num45)
-} 
-
-// rename repayment groups so that income bracket is last
-rename *lo_inc_rpy_`year_repay' *repayRate_lo
-rename *md_inc_rpy_`year_repay' *repayRate_md
-rename *hi_inc_rpy_`year_repay' *repayRate_hi
-
-// for now, act as if these brackets map onto terciles
-rename *mn_earn_wne_inc1_p`year_earn' *earnings_lo
-rename *mn_earn_wne_inc2_p`year_earn' *earnings_md
-rename *mn_earn_wne_inc3_p`year_earn' *earnings_hi
-
-// reshape by bracket
-unab vars: *netPrice* *repayRate* *earnings*
-local stubs: subinstr local vars "_lo" "", all
-local stubs: subinstr local stubs "_md" "", all
-local stubs: subinstr local stubs "_hi" "", all
-local stubs: list uniq stubs
-gen id_reshape = _n
-reshape long `stubs', i(id_reshape) j(bracket) string
-
-// format bracket
-replace bracket = subinstr(bracket, "_", "", .)
-replace bracket = "high" if bracket == "hi"
-replace bracket = "mid"  if bracket == "md"
-replace bracket = "low"  if bracket == "lo"
-egen j = group(i bracket)
 
 ***********************************************
 
@@ -127,7 +140,7 @@ gen suggest = 1
 replace suggest = 0 if alt_netPrice > (`netPriceMax' * netPrice)
 
 // graduation, repayment and earnings must be higher than both chosen school and state average
-foreach v of varlist c150_4_pooled_supp repayRate earnings {
+foreach v of varlist grad repay earnings {
 	replace suggest = 0 if (alt_`v' > `v') | (alt_`v' < state_`v')
 }
 
@@ -146,17 +159,16 @@ drop if opeid6 == alt_opeid6
 
 *** OUTPUT SUGGESTED SCHOOLS ***
 
-// rename variables
-keep j stabbr opeid6 instnm bracket suggest alt_instnm 
-rename (instnm stabbr bracket) (college state income)
+// rename identifiers
+rename (instnm stabbr) (college state)
 
 // save obs with no suggested alternatives
-bysort j: egen anySuggest = max(suggest)
+bysort i: egen anySuggest = max(suggest)
 preserve
 keep if !anySuggest
-keep  state college opeid income 
-order state college opeid income 
-sort state college income
+keep  state college opeid income* 
+order state college opeid income* 
+sort state college income_low
 duplicates drop
 export excel using $root/output/suggestedSchools.xlsx, firstrow(variables) sheet(none) sheetreplace
 restore
@@ -164,10 +176,9 @@ restore
 // save schools with at least one suggested alternative
 keep if suggest
 rename alt_instnm suggested
-keep  state college opeid income suggested
-order state college opeid income suggested
-sort state college income suggested
-duplicates drop
+keep  state college opeid income* suggested
+order state college opeid income* suggested
+sort state college income_low suggested
 export excel using $root/output/suggestedSchools.xlsx, firstrow(variables) sheet(suggested) sheetreplace
 
 ***********************************************
