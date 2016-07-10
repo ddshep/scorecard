@@ -70,14 +70,14 @@ qui log off
 *** JOIN DATA TO GENERATE COMPARISONS ***
 
 // save sample
-tempfile sample sample_using states
+tempfile sample alt states
 save `sample'
 
 // add alt prefixes for candidate schools
 keep `vars_rank' st_fips instnm *opeid*
 rename * alt_*
 rename alt_st_fips st_fips
-save `sample_using'
+save `alt'
 
 // calculate state averages
 use `sample', clear
@@ -90,7 +90,7 @@ save `states'
 // join with all schools in the state
 use `sample', clear
 gen i = _n
-joinby st_fips using `sample_using'
+joinby st_fips using `alt'
 
 // merge with state averages
 merge m:1 st_fips using `states', assert(match) nogen
