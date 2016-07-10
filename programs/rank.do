@@ -115,9 +115,13 @@ egen j = group(i bracket)
 
 *** DETERMINE SUGGESTED SCHOOLS ***
 
-// apply suggestion criteria
+// initialize suggested indicator
 gen suggest = 1
+
+// candidate net price cannot exceed sum fraction of chosen net price
 replace suggest = 0 if alt_netPrice > (`netPriceMax' * netPrice)
+
+// graduation, repayment and earnings must be higher than both chosen school and state average
 foreach v of varlist c150_4_pooled_supp repayRate earnings {
 	replace suggest = 0 if (alt_`v' > `v') | (alt_`v' < state_`v')
 }
