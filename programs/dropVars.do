@@ -59,11 +59,3 @@ foreach v of varlist *_rpy_* {
 }
 
 ***********************************************
-
-*** TEST SCORES ***
-
-// drop subject specific scores
-drop satvr* satmt* satwr*
-drop acten* actmt* actwr*
-
-***********************************************
