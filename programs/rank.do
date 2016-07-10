@@ -46,24 +46,8 @@ keep if distanceonly == "Not distance-education only":distanceonly
 // keep four-year schools
 keep if preddeg == "Predominantly bachelor's-degree granting":preddeg
 
-// show distribution of first-time, full-time share
-#delimit ; 
-hist pftftug1_ef, 
-	title("# of institutions by first-time, full-time share")
-	ylabel(0(20)120)
-	freq
-;
-graph export $root/output/firstTimeFullTime.pdf, replace ;
-window manage close graph; 
-#delimit cr
-
 // restrict to those with sufficient first-time, full-time share
 keep if pftftug1_ef > `ftft_min' & !missing(pftftug1_ef)
-
-// count schools by state
-qui log on 
-tab st_fips
-qui log off
 
 ***********************************************
 
