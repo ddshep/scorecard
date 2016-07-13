@@ -194,4 +194,16 @@ sort state college income_low suggested
 compress
 export excel using $root/output/suggestedSchools.xlsx, firstrow(variables) sheet(suggested) sheetreplace
 
+// save highlighted examples
+gen keeper = 0
+replace keeper = 1 if (income_high == `income20') & (state == "AL") & (college == "Jacksonville State University")
+replace keeper = 1 if (income_high == `income40') & (state == "WA") & (college == "Walla Walla University")
+replace keeper = 1 if (income_high == `income60') & (state == "MA") & (college == "Becker College")
+replace keeper = 1 if (income_high == `income80') & (state == "CA") & (college == "Loyola Marymount University")
+keep if keeper
+keep i state college income* suggested *grad* *netPrice* *earnings* *repay*
+order state college income_low income_high alt*
+expand 2
+export excel using $root/output/suggestedSchools.xlsx, firstrow(variables) sheet(examples) sheetreplace
+
 ***********************************************
