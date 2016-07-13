@@ -136,6 +136,11 @@ compress
 // initialize suggested indicator
 gen suggest = 1
 
+// throw out schools missing ranking variables
+foreach v of varlist netPrice grad repay earnings {
+	replace suggest = 0 if missing(`v') | missing(alt_`v')
+}
+
 // candidate net price cannot exceed sum fraction of chosen net price
 replace suggest = 0 if alt_netPrice > (`netPriceMax' * netPrice)
 
