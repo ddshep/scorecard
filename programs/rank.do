@@ -37,7 +37,10 @@ local vars_rank
 	grad			
 	earnings					
 	repay				
-	sat* act*					
+	satmt* satvr* actcm*				
+;
+local vars_weight
+	ugds
 ;
 #delimit cr
 
@@ -104,19 +107,19 @@ rename c150_4_pooled_supp grad
 *** JOIN DATA TO GENERATE COMPARISONS ACROSS SCHOOLS ***
 
 // save sample
+keep `vars_rank' `vars_weight' i stabbr st_fips income* instnm *opeid* 
 tempfile sample alt states
+compress
 save `sample'
 
 // add alt prefixes for candidate schools
-keep `vars_rank' st_fips income* instnm *opeid*
 rename * alt_*
 rename (alt_st_fips alt_income*) (st_fips income*)
 save `alt'
 
 // calculate state averages
 use `sample', clear
-keep `vars_rank' st_fips income* instnm ugds
-collapse `vars_rank' [aw = ugds], by(st_fips income_low income_high)
+collapse `vars_rank' [aw = `vars_weight'], by(st_fips income_low income_high)
 rename * state_*
 rename (state_st_fips state_income*) (st_fips income*)
 save `states'
@@ -127,7 +130,6 @@ joinby st_fips income_low income_high using `alt'
 
 // merge with state averages
 merge m:1 st_fips income_low income_high using `states', assert(match) nogen
-compress
 
 ***********************************************
 
@@ -160,6 +162,12 @@ foreach exam in actcm satmt satvr {
 // drop own matches
 drop if opeid6 == alt_opeid6
 
+// drop state thresholds
+drop state_*
+aorder
+
+// implement head to head tie breaker here
+
 ***********************************************
 
 *** OUTPUT SUGGESTED SCHOOLS ***
@@ -170,20 +178,20 @@ rename (instnm stabbr) (college state)
 // save obs with no suggested alternatives
 bysort i: egen anySuggest = max(suggest)
 preserve
-keep if !anySuggest
-keep  state college opeid income* 
-order state college opeid income* 
-sort state college income_low
-duplicates drop
-export excel using $root/output/suggestedSchools.xlsx, firstrow(variables) sheet(none) sheetreplace
+	keep if !anySuggest
+	drop alt_*
+	duplicates drop
+	order state college opeid income* 
+	sort state college income_low
+	export excel using $root/output/suggestedSchools.xlsx, firstrow(variables) sheet(none) sheetreplace
 restore
 
 // save schools with at least one suggested alternative
 keep if suggest
 rename alt_instnm suggested
-keep  state college opeid income* suggested
-order state college opeid income* suggested
+order state college income* suggested *grad* *netPrice* *earnings* *repay*
 sort state college income_low suggested
+compress
 export excel using $root/output/suggestedSchools.xlsx, firstrow(variables) sheet(suggested) sheetreplace
 
 ***********************************************
