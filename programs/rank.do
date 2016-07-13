@@ -141,7 +141,7 @@ replace suggest = 0 if alt_netPrice > (`netPriceMax' * netPrice)
 
 // graduation, repayment and earnings must be higher than both chosen school and state average
 foreach v of varlist grad repay earnings {
-	replace suggest = 0 if (alt_`v' > `v') | (alt_`v' < state_`v')
+	replace suggest = 0 if (alt_`v' < `v') | (alt_`v' < state_`v') 
 }
 
 // if chosen school has non-missing test scores, 25th percentile of candidate schools cannot be 
