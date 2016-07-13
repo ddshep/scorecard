@@ -2,7 +2,7 @@ The master Stata program is programs/run.do.  To execute the program, you'll nee
 
 - build.do assembles the raw Scorecard data and applies value labels to all the categorical variables.
 
-- dropVars.do takes the built data and drops a bunch of the excess ariables that we don't use for our analysis to speed up run time.
+- dropVars.do takes the built data and drops a bunch of the excess variables that we don't use for our analysis to speed up run time.
 
 - rank.do generates the list of suggested colleges that "outrank" each school based on our algorithm parameters
 
