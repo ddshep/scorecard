@@ -26,8 +26,8 @@ local income100	= .
 local income_pcts 0 20 33 40 60 66 80
 
 // test score bandwidths
-local bw_actcm = 5
-local bw_satmt = 200
+local bw_actcm = 1
+local bw_satmt = 50
 local bw_satvr = `bw_satmt'
 
 // variables that we're ranking on
